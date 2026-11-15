@@ -1,105 +1,92 @@
 # IV Atlas
 
-A focused Pokémon GO PvP search experience for comparing the best IV spreads across Little, Great, Ultra, and Master League evolutions.
+IV Atlas helps Pokémon GO players find and compare PvP IV combinations across Little, Great, Ultra, and Master League.
 
-## Run locally
+## Using the website
 
-The project uses Vite + React + TypeScript:
+### 1. Search for a Pokémon
+
+Open the Rankings page and search for any Pokémon by name. Pokémon from the PvPoke Game Master database are searchable, including Pokémon that are not currently in PvPoke’s top rankings.
+
+The search also detects the Pokémon’s evolution family.
+
+### 2. Add your IV candidates
+
+Use the three horizontal IV selectors:
+
+- Attack
+- Defense
+- Stamina
+
+Each selector contains buttons from 0 to 15. Select the IV values for one Pokémon and choose **Add IV spread**. Add multiple candidates to compare them together.
+
+### 3. Read the exact ranking table
+
+The first table shows the IV candidates you added. It includes the searched Pokémon and every available evolution in its family.
+
+For each candidate, the table displays:
+
+- Exact IV rank out of all 4,096 combinations
+- Little League rank, CP, and level
+- Great League rank, CP, and level
+- Ultra League rank, CP, and level
+- Master League rank, CP, and level
+
+This is the table to use when checking a Pokémon you already own.
+
+### 4. Inspect the top 100 IV spreads
+
+Below the candidate table, IV Atlas displays the top 100 stat-product spreads for the searched Pokémon. Each row represents one IV rank, with all four leagues shown side by side.
+
+The evolution-family section below it provides the same top-100 table for each evolution.
+
+Use **Show top 10** when you only want the strongest ten spreads. Use **Show all 100** to restore the complete table.
+
+### 5. Use the League page
+
+The League page starts with the Top 100 Master League rankings. You can change the league to Little, Great, Ultra, or Master League.
+
+Available display limits:
+
+- Top 100
+- Top 250
+- Top 500
+- All rankings
+
+You can also filter by Pokémon type. Each result shows its rank, type, best IVs, CP, level, and tier.
+
+### 6. Use the other tools
+
+- **Calculator:** Select a Pokémon, level, and IV values to estimate CP and HP.
+- **Search strings:** Generate a Pokémon GO search string for an evolution family and copy it to the clipboard.
+- **Typing:** Review type weaknesses or open the type quiz.
+- **Settings:** Switch between light and dark themes and reset view settings.
+
+## Data and updates
+
+The website loads Pokémon, evolution, base-stat, and ranking data from PvPoke’s public data files. Data is fetched when the site loads, so upstream PvPoke updates are reflected automatically without changing this website’s code.
+
+The browser must have network access to GitHub’s raw content URLs. IV calculations are performed in the browser using all 4,096 IV combinations and the league CP limits.
+
+The calculation engine follows PvPoke’s current rules: exact Game Master CPM values for every half level through level 51, `floor()` CP using the standard Pokémon GO formula, effective attack and defense kept as decimals, and floored HP. Stat product is the raw `attack × defense × HP` value. Equal stat products are ordered by higher CP, then deterministic IV order. This is why values such as Palkia Origin Ultra League `0 / 15 / 10` resolve to CP 2499, level 22.5, and stat product 3,443,589.
+
+## For developers
+
+Install and run locally:
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Deploy to Vercel
-
-This project includes [`vercel.json`](./vercel.json) for Vite. From the project folder, connect the repository to Vercel and deploy with:
+Build for production:
 
 ```bash
-npx vercel
-npx vercel --prod
-```
-
-Alternatively, import the repository in the Vercel dashboard. Vercel will detect Vite, run `npm run build`, and publish the `dist` directory.
-
-### GitHub → Vercel setup
-
-1. Install Node.js LTS and Git, then open a terminal in this folder:
-
-```bash
-cd /home/kumar/Documents/VsCodeFiles/PROJECTS/pvp_iv_app
-npm install
 npm run build
 ```
 
-2. Create a new empty repository on GitHub. Do not initialize it with another README or `.gitignore`.
+The project includes [`vercel.json`](./vercel.json) for Vercel deployment. Vercel uses `npm run build` and publishes the `dist` directory.
 
-3. Initialize and push this project:
+## Attribution
 
-```bash
-git init
-git branch -M main
-git add .
-git commit -m "Initial IV Atlas app"
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-git push -u origin main
-```
-
-Replace `YOUR_USERNAME` and `YOUR_REPOSITORY` with your GitHub account and repository name. GitHub may ask you to sign in or use a personal access token.
-
-4. Open Vercel, choose **Add New → Project**, connect GitHub, select the repository, and click **Deploy**. Use these settings if Vercel asks:
-
-```text
-Framework Preset: Vite
-Root Directory: .
-Build Command: npm run build
-Output Directory: dist
-Install Command: npm install
-```
-
-After the first deployment, every push to the connected production branch creates a new deployment automatically. Pull requests and other branches receive preview deployments.
-
-## Data integration
-
-The app now loads the live PvPoke repository data directly from GitHub in [`src/pvpokeData.ts`](./src/pvpokeData.ts):
-
-- `src/data/gamemaster.json` for Pokémon names, base stats, dex numbers, and evolution links.
-- `src/data/rankings/all/overall/rankings-500.json` for Little Cup.
-- `src/data/rankings/all/overall/rankings-1500.json` for Great League.
-- `src/data/rankings/all/overall/rankings-2500.json` for Ultra League.
-- `src/data/rankings/all/overall/rankings-10000.json` for Master League.
-
-The ranking files provide the PvPoke league context. The Game Master makes every species searchable, including Pokémon that are not in the current top 100. When a Pokémon is searched, the app evaluates all 4,096 IV combinations and legal half-levels for each of the four league caps, sorts them by stat product, and displays the top 100 IV spreads in one comparison table. A second table repeats the same 100-row comparison for every available member of the evolution family.
-
-The comparison table has one row per IV rank and one column each for Little, Great, Ultra, and Master League. Each league cell shows the IV spread, CP, and level. Tables open with all 100 rows visible; the “Show top 10” control is only a compact view option.
-
-## IV candidate ranking
-
-The search page also includes an IV candidate selector. Add as many Attack / Defense / Stamina combinations as you want. The exact-ranking table above the top-100 tables then shows each candidate for the searched Pokémon and every evolution in the family, including its rank out of all 4,096 possible IV combinations, CP, level, and league.
-
-Each IV selector uses a quick-access 1 × 16 horizontal button row for values 0–15 instead of a dropdown. On mobile, each row remains one line and scrolls horizontally when needed.
-
-This keeps the data current with the upstream repository, but the browser needs network access to GitHub. PvPoke is an MIT-licensed open-source project; this app consumes its public data files and is not a replacement for its battle simulation engine.
-
-### Does the database update automatically?
-
-Yes. The deployed app fetches the current PvPoke Game Master and ranking JSON files in the browser each time it loads, so upstream ranking and Pokémon data changes are picked up without redeploying this app. A redeploy is only needed when the application code or calculation logic changes. The app does require the user’s browser to have access to GitHub’s raw content URLs.
-
-## Feature parity with PvP IVs
-
-The app now includes functional equivalents of the public tools on pvpivs.com:
-
-- Single Pokémon IV rankings: top 100 spreads in Little, Great, Ultra, and Master League columns.
-- A separate evolution-family section with the same top-100-per-league tables.
-- Beta multi-form ranking view.
-- League-wide top-100 rankings for Little, Great, Ultra, and Master.
-- League view defaults to Top 100 Master League and supports Top 100, Top 250, Top 500, or all available rankings. It also filters by Pokémon type, with rank, type, IVs, CP, level, and tier visible.
-- Search-string builder with copy-to-clipboard.
-- IV calculator with level and IV sliders.
-- Type weakness chart and a type quiz.
-- Dark mode, settings panel, family-evolution toggle controls, and reset settings.
-- About page and mobile-friendly navigation.
-
-The visual theme uses a high-contrast black/white system with bright red accents. Light and dark modes explicitly set surface, text, muted text, border, table, input, and button colors so content remains readable in either mode.
-
-The implementation is intentionally built on PvPoke’s public Game Master and ranking files rather than scraping pvpivs.com. PvP IVs’ public pages expose the same broad tool areas—rankings, search strings, calculator, typing chart, quiz, and advanced controls—but their private implementation/data should not be copied.
+IV Atlas uses public data from the open-source PvPoke project. Pokémon and Pokémon GO names and artwork belong to their respective owners.
